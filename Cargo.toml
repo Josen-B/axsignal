@@ -2,8 +2,9 @@
 name = "axsignal"
 version = "0.1.0"
 edition = "2021"
-keywords = ["Starry"]
-
+keywords = ["Starry", "signal"]
+authors = ["Youjie Zheng <zyj578335934@gmail.com>"]
+description = "Module with linux signal definitions"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [features]
