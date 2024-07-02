@@ -6,9 +6,12 @@
 #[repr(C)]
 #[derive(Clone, Copy, Debug)]
 pub struct SignalStack {
-    sp: usize,
-    flags: u32,
-    size: usize,
+    /// Base address of the stack
+    pub sp: usize,
+    /// Flags for the stack
+    pub flags: u32,
+    /// Size of the stack
+    pub size: usize,
 }
 
 impl Default for SignalStack {
@@ -16,7 +19,7 @@ impl Default for SignalStack {
         Self {
             sp: 0,
             // 代表SS_DISABLE，即不使用栈
-            flags: 2,
+            flags: super::SS_DISABLE,
             size: 0,
         }
     }

@@ -18,7 +18,7 @@ pub mod ucontext;
 #[derive(Clone)]
 pub struct SignalHandler {
     /// handlers`[i]` stands for the handler of signal `i+1`
-    pub handlers: [Option<SigAction>; MAX_SIG_NUM],
+    pub handlers: [SigAction; MAX_SIG_NUM],
 }
 
 impl Default for SignalHandler {
@@ -32,7 +32,7 @@ impl SignalHandler {
     pub fn new() -> Self {
         Self {
             // 默认所有信号都是默认处理
-            handlers: [None; MAX_SIG_NUM],
+            handlers: [SigAction::default(); MAX_SIG_NUM],
         }
     }
 
@@ -41,16 +41,13 @@ impl SignalHandler {
     /// 会在exec时清空
     pub fn clear(&mut self) {
         for action in self.handlers.iter_mut() {
-            *action = None;
+            *action = SigAction::default();
         }
     }
 
     /// To get the action of a signal with the signal number
-    pub fn get_action(&self, sig_num: usize) -> Option<&SigAction> {
-        // 若未设置对应函数或者对应函数为SIG_DFL，则代表默认处理，直接返回空
-        self.handlers[sig_num - 1]
-            .as_ref()
-            .filter(|&action| action.sa_handler != action::SIG_DFL)
+    pub fn get_action<'a>(&'a self, sig_num: usize) -> &'a SigAction {
+        &self.handlers[sig_num - 1]
     }
     /// 设置信号处理函数
     ///
@@ -58,7 +55,7 @@ impl SignalHandler {
     ///
     /// 传入的action必须是合法的指针
     pub unsafe fn set_action(&mut self, sig_num: usize, action: *const SigAction) {
-        self.handlers[sig_num - 1] = Some(unsafe { *action });
+        self.handlers[sig_num - 1] = unsafe { *action };
     }
 }
 

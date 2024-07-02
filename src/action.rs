@@ -84,7 +84,7 @@ impl SignalDefault {
 }
 
 #[repr(C)]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 /// The structure of the signal action
 pub struct SigAction {
     /// 信号处理函数的地址
@@ -117,5 +117,9 @@ impl SigAction {
         } else {
             None
         }
+    }
+
+    pub fn need_restart(&self) -> bool {
+        self.sa_flags.contains(SigActionFlags::SA_RESTART)
     }
 }
