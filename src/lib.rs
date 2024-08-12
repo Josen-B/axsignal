@@ -5,9 +5,13 @@
 //! 当前采用在trap return时进行信号的处理。因此为了防止信号处理延时过长，需要开启时钟中断，使得OS每隔一段时间触发
 //! 一次trap，从而检查是否有需要处理的信号。
 #![cfg_attr(not(test), no_std)]
+extern crate alloc;
+use alloc::collections::BTreeMap;
 
 use action::SigAction;
+use info::SigInfo;
 use signal_no::{SignalNo, MAX_SIG_NUM};
+use ucontext::SignalUserContext;
 
 pub mod action;
 pub mod info;
@@ -60,12 +64,14 @@ impl SignalHandler {
 }
 
 /// 接受信号的结构，每一个进程都有一个
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct SignalSet {
     /// 信号掩码
     pub mask: usize,
     /// 未决信号集
     pub pending: usize,
+    /// 附加信息
+    pub info: BTreeMap<usize, (SigInfo, SignalUserContext)>,
 }
 
 impl Default for SignalSet {
@@ -80,6 +86,7 @@ impl SignalSet {
         Self {
             mask: 0,
             pending: 0,
+            info: BTreeMap::new(),
         }
     }
 
@@ -131,8 +138,13 @@ impl SignalSet {
     /// 若当前信号已经加入到未决信号集中，则不作处理
     ///
     /// 若信号在掩码中，则仍然加入，但是可能不会触发
-    pub fn try_add_signal(&mut self, sig_num: usize) {
+    pub fn try_add_signal(&mut self, sig_num: usize, info: Option<SigInfo>) {
         let now_mask = 1 << (sig_num - 1);
         self.pending |= now_mask;
+        // self.info[sig_num - 1] = info.map(|info| (info, SignalUserContext::default()));
+        if let Some(info) = info {
+            self.info
+                .insert(sig_num, (info, SignalUserContext::default()));
+        }
     }
 }

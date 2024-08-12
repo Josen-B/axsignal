@@ -25,7 +25,7 @@ impl Default for SignalStack {
     }
 }
 #[repr(C)]
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 /// The `mcontext` struct for the signal action
 pub struct MContext {
     // gregs
@@ -76,7 +76,7 @@ impl MContext {
 }
 
 #[repr(C)]
-#[derive(Clone)]
+#[derive(Clone, Copy)]
 /// The user context saved for the signal action, which can be accessed by the signal handler
 pub struct SignalUserContext {
     flags: usize,
@@ -85,6 +85,19 @@ pub struct SignalUserContext {
     mcontext: MContext,
     sigmask: u64,
     _fpregs: [usize; 64],
+}
+
+impl Default for SignalUserContext {
+    fn default() -> Self {
+        Self {
+            _fpregs: [0; 64],
+            flags: 0,
+            link: 0,
+            stack: SignalStack::default(),
+            mcontext: MContext::default(),
+            sigmask: 0,
+        }
+    }
 }
 
 impl SignalUserContext {

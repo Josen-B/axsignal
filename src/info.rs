@@ -5,6 +5,8 @@
 /// The information of the signal
 ///
 /// When the `SigAction` specifies that it needs information, it will return it to the user
+#[repr(C)]
+#[derive(Clone, Copy)]
 pub struct SigInfo {
     /// The signal number
     pub si_signo: i32,
@@ -12,6 +14,17 @@ pub struct SigInfo {
     pub si_errno: i32,
     /// The code of the signal
     pub si_code: i32,
+
+    #[allow(unused)]
+    pub pad: u32,
+
+    pub pid: i32,
+
+    pub uid: u32,
+
+    pub si_val_int: i32,
+
+    pub si_val_ptr: usize,
 }
 
 impl Default for SigInfo {
@@ -20,6 +33,11 @@ impl Default for SigInfo {
             si_signo: 0,
             si_errno: 0,
             si_code: -6, // SI_TKILL
+            pad: 0,
+            pid: 0,
+            uid: 0,
+            si_val_int: 0,
+            si_val_ptr: 0,
         }
     }
 }
